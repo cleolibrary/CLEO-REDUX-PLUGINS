@@ -48,3 +48,5 @@ jobs:
       uses: richardsimko/update-tag@v1.0.5
       with:
         tag_name: latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
