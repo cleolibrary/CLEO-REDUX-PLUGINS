@@ -1,0 +1,50 @@
+name: GitHub Actions Build
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - name: Configure build
+      shell: cmd
+      run: |
+        ./premake5.bat
+    - name: Build
+      shell: cmd
+      run: |
+        msbuild -m build/MemoryOperations.sln /property:Configuration=Release
+    - name: Pack binaries
+      shell: cmd
+      run: |
+        7z a -tzip "./bin/MemoryOperations.zip" "./data/MemoryOperations/plugins/cleo/cleo_plugins/MemoryOperations.cleo"
+        7z a -tzip "./bin/MemoryOperations64.zip" "./data/MemoryOperations64/Gameface/Binaries/Win64/cleo/cleo_plugins/MemoryOperations64.cleo"
+    - name: Get release info
+      id: release_info
+      uses: cardinalby/git-get-release-action@1.1.1
+      env:
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag: latest
+    - name: Upload Release
+      uses: ncipollo/release-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        allowUpdates: true
+        name: ${{ steps.release_info.outputs.name }}
+        body: ${{ steps.release_info.outputs.body }}
+        tag: ${{ steps.release_info.outputs.tag_name }}
+        artifacts: bin/*.zip
+    - name: Update Tag
+      uses: richardsimko/update-tag@v1.0.5
+      with:
+        tag_name: latest

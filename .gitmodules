@@ -1,0 +1,6 @@
+[submodule "external/hooking"]
+	path = external/hooking
+	url = https://github.com/ThirteenAG/Hooking.Patterns
+[submodule "external/modutils"]
+	path = external/modutils
+	url = https://github.com/CookiePLMonster/ModUtils
